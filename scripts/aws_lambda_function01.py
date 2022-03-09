@@ -7,9 +7,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 #define the connection
-# region = 'us-east-2'
 region = 'us-east-1'
 account_id = ''
+sns_topic_name = 'test_auto_alarm'
 ec2 = boto3.resource('ec2', region_name=region)
 
 # Create CloudWatch client
@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     filters = [
         {
             'Name': 'tag:NICKNAME',
-            'Values': ['alarm_with_tag']
+            'Values': ['test_alarm_tag']
         }
     ]
     
@@ -47,7 +47,9 @@ def lambda_handler(event, context):
             Threshold=0,
             ActionsEnabled=True,
             AlarmActions=[
-            f'arn:aws:swf:{region}:{account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0'
+            # f'arn:aws:swf:{region}:{account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0',
+            # f'arn:aws:automate:{region}:ec2:reboot', f'arn:aws:sns:{region}:{account_id}:{sns_topic_name}',
+            f'arn:aws:swf:{region}:{account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0', f'arn:aws:sns:{region}:{account_id}:{sns_topic_name}', 
             ],
             AlarmDescription='Alarm when status check fails',
             Dimensions=[
@@ -60,7 +62,7 @@ def lambda_handler(event, context):
             Tags=[
                 {
                     'Key': 'NICKNAME',
-                    'Value': 'alarm_with_tag'
+                    'Value': 'test_alarm_tag'
                 },
             ],
             Unit='Seconds'
